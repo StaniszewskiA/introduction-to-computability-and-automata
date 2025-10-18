@@ -55,9 +55,9 @@ class EmptySet(RegularExpression):
         return isinstance(other, EmptySet)
 
 
-class Union(RegularExpression):
+class RegexUnion(RegularExpression):
     """
-        Union of two expressions (L_1|L_2)
+        RegexUnion of two expressions (L_1|L_2)
     """
 
     def __init__(self, left: RegularExpression, right: RegularExpression):
@@ -80,7 +80,7 @@ class Union(RegularExpression):
 
 def make_union(left: RegularExpression, right: RegularExpression) -> RegularExpression:
     """
-        Make Union of two expressions
+        Make RegexUnion of two expressions
     """
     if isinstance(left, EmptySet):
         return right
@@ -89,10 +89,10 @@ def make_union(left: RegularExpression, right: RegularExpression) -> RegularExpr
     if left == right:
         return left
     
-    return Union(left, right)
+    return RegexUnion(left, right)
 
 
-class Concat(RegularExpression):
+class RegexConcat(RegularExpression):
     """
         Concatenation of two expressions (L_1L_2)
     """
@@ -125,10 +125,10 @@ def make_concat(left: RegularExpression, right: RegularExpression) -> RegularExp
         return left
     if isinstance(left, EmptySet) or isinstance(right, EmptySet):
         return EmptySet()
-    return Concat(left, right)
+    return RegexConcat(left, right)
 
 
-class KleeneStar(RegularExpression):
+class RegexKleeneStar(RegularExpression):
     """
         Kleene Star of an expresions (L_1*)
     """
@@ -140,13 +140,13 @@ class KleeneStar(RegularExpression):
         if isinstance(self.expr, EmptyString) or isinstance(self.expr, EmptySet):
             return "\u03b5"  # ε* = ∅* = ε 
         
-        if isinstance(self.expr, Union):
+        if isinstance(self.expr, RegexUnion):
             left = self.expr.left
             right = self.expr.right
             if isinstance(left, EmptyString):
-                return f"{KleeneStar(right)}"
+                return f"{RegexKleeneStar(right)}"
             elif isinstance(right, EmptyString):
-                return f"{KleeneStar(left)}"
+                return f"{RegexKleeneStar(left)}"
             
         expr_str = _add_parantheses(str(self.expr))
 
@@ -159,7 +159,7 @@ def make_kleene_star(regex: RegularExpression) -> RegularExpression:
     """
     if isinstance(regex, (EmptyString, EmptySet)):
         return EmptyString()
-    return KleeneStar(regex)
+    return RegexKleeneStar(regex)
 
 
 def _strip_parantheses(expr_str: str) -> str:
@@ -171,10 +171,10 @@ def _strip_parantheses(expr_str: str) -> str:
     return expr_str
 
 
-def _add_parantheses(expr_str) -> str:
+def _add_parantheses(expr_str: str) -> str:
     """
         Add paranthese around an union or concat expresion
     """
-    if isinstance(expr_str, (Union, Concat)):
+    if isinstance(expr_str, (RegexUnion, RegexConcat)):
         expr_str = f"({expr_str})"
     return expr_str
