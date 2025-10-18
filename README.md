@@ -1,1 +1,1 @@
-Utilities for Introduction to Computability and Automata at Jagiellonian University in Cracow.
+Utilities for Introduction to Computability and Automata course at Jagiellonian University in Cracow.
