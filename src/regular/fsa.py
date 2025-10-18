@@ -1,23 +1,106 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
-from src.regular.regular_expression import RegularExpression
+from src.regular.regular_expression import EmptySet, EmptyString, RegularExpression, Symbol, make_concat, make_kleene_star, make_union
 
 class RegexConvertible:
     """
-        Mixin for regex conversion between DFA and NFA.
+        Mixin for regex conversion.
     """
 
     def to_regex(self) -> RegularExpression:
         """
             Convert FSA to a RegEx using state state elimination.
+
+            https://cs.stackexchange.com/questions/130529/complete-explanation-of-state-elimination-methods
         """
-        pass
+        states = self.get_states()
+
+        # R[i][j] - regex for direct transition from state i to state j
+        R: dict[str, dict[str, RegularExpression]] = {} # Example: R["S"]["A"] = Symbol("a"), S--a-->A
+
+        for state1 in states:
+            R[state1] = {}
+            for state2 in states:
+                R[state1][state2] = EmptySet()
+
+        for from_state, transitions in self.delta.items():
+            for symbol, target in transitions.items():
+                if symbol == '':  # Epsilon transition
+                    symbol_regex = EmptyString()
+                else:
+                    symbol_regex = Symbol(symbol)
+
+                if isinstance(self, DFA):
+                    # Target is a single state
+                    to_state = target
+                    curr_symbol = R[from_state][to_state]
+                    if isinstance(curr_symbol, EmptySet):
+                        R[from_state][to_state] = symbol_regex # No symbols yet
+                    else:
+                        R[from_state][to_state] = make_union(curr_symbol, symbol_regex)
+                else:
+                    # Target is a set of state
+                    for to_state in target:
+                        curr_symbol = R[from_state][to_state]
+                        if isinstance(curr_symbol, EmptySet):
+                            R[from_state][to_state] = symbol_regex # No symbols yet
+                        else:
+                            R[from_state][to_state] = make_union(curr_symbol, symbol_regex)
+
+        # One final state for NFAs
+        if len(self.final_states) > 1:
+            new_final_state = "F_new"
+            states.add(new_final_state)
+            R[new_final_state] = {}
+            for state in states:
+                if state != new_final_state:
+                    R[state][new_final_state] = EmptySet()
+                R[new_final_state][state] = EmptySet()
+
+            # Epsilon transitions
+            for final_state in self.finale_states:
+                R[final_state][new_final_state] = EmptyString()
+
+            final_state = new_final_state
+        else:
+            final_state = next(iter(self.final_states))
+
+        # State elimination
+        elimination_order = [state for state in states if state not in (self.start, final_state)]
+
+        for k in elimination_order:
+            remaining_states = [state for state in states if state != l]
+
+            for i in remaining_states:
+                for j in remaining_states:
+                    # New path: i -> k -> j
+                    # R'[i][j] = R[i][j] | R[i][k] R[k][k]* R[k][j]
+                    # R[k][k]* = loop on k
+                    old_path = R[i][j]
+                    new_path = make_concat(
+                        make_concat(R[i][k], make_kleene_star(R[k][k])),
+                        R[k][j]
+                    )
+                    R[i][j] = make_union(old_path, new_path)
+
+            states.remove(k)
+
+        start_loop = R[self.start][self.start]
+        direct_path = R[self.start][final_state]
+
+        if isinstance(start_loop, EmptySet):
+            return direct_path
+        
+        return make_concat(make_kleene_star(start_loop), direct_path)
 
 
 class FSA(ABC):
     """
         Abstract base class for Finite State Automata.
+
+        Default values are derived from one of the homeworks: a DFA accepting 
+        strings with an odd number of b's and an even number of a's,
     """
 
     def __init__(
@@ -27,7 +110,30 @@ class FSA(ABC):
         start_state = None,
         final_states = None 
     ):
-        pass
+        if alphabet is None:
+            self.alphabet = {'a', 'b'}
+        else:
+            self.alphabet = set(alphabet)
+
+        if start_state is None:
+            self.start = 'S'
+        else:
+            self.start = start_state
+
+        if final_states is None:
+            self.final_states = {'F'}
+        else:
+            self.final_states = set(final_states)
+
+        if transitions is None:
+            self.delta = {
+                'S': {'a': 'A', 'b': 'F'},
+                'A': {'a': 'S', 'b': 'B'},
+                'B': {'a': 'F', 'b': 'A'},
+                'F': {'a': 'B', 'b': 'S'},
+            }
+        else:
+            self.delta = transitions
 
     @abstractmethod
     def accepts(self, s: str) -> bool:
