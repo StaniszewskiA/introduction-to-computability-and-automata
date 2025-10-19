@@ -70,7 +70,7 @@ class RegexConvertible:
         elimination_order = [state for state in states if state not in (self.start, final_state)]
 
         for k in elimination_order:
-            remaining_states = [state for state in states if state != l]
+            remaining_states = [state for state in states if state != k]
 
             for i in remaining_states:
                 for j in remaining_states:
@@ -177,7 +177,7 @@ class DFA(FSA, RegexConvertible):
         """
             Return True iff the DFA accepts the string s.
         """
-        state = self.state
+        state = self.start
         for i, ch in enumerate(s):
             if ch not in self.alphabet:
                 raise ValueError(f"invalid input symbol at pos {i}: '{ch}' not in alphabet {sorted(self.alphabet)}")

@@ -4,6 +4,10 @@ from src.regular.regular_expression import (
 )
 
 
+# =============================================================================
+# BASIC FUNCTIONALITIES
+# =============================================================================
+
 class TestSymbol:
     """
         Class for Symbol tests.
@@ -334,3 +338,4 @@ class TestComplexExpressions:
 
         concat = make_concat(a, star)
         assert concat == a or str(concat) == 'a'
+        
