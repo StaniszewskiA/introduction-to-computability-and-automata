@@ -109,8 +109,8 @@ class RegexConcat(RegularExpression):
         if isinstance(self.left, EmptySet) or isinstance(self.right, EmptySet):
             return "\u2205" # Unicode for ∅
         
-        left_str = _add_parantheses(str(self.left))
-        right_str = _add_parantheses(str(self.right))
+        left_str = _add_parantheses(self.left)
+        right_str = _add_parantheses(self.right)
 
         return f"{left_str}{right_str}"
 
@@ -148,7 +148,7 @@ class RegexKleeneStar(RegularExpression):
             elif isinstance(right, EmptyString):
                 return f"{RegexKleeneStar(left)}"
             
-        expr_str = _add_parantheses(str(self.expr))
+        expr_str = _add_parantheses(self.expr)
 
         return f"{expr_str}*"
 
@@ -171,10 +171,10 @@ def _strip_parantheses(expr_str: str) -> str:
     return expr_str
 
 
-def _add_parantheses(expr_str: str) -> str:
+def _add_parantheses(expr: RegularExpression) -> str:
     """
         Add paranthese around an union or concat expresion
     """
-    if isinstance(expr_str, (RegexUnion, RegexConcat)):
-        expr_str = f"({expr_str})"
-    return expr_str
+    if isinstance(expr, (RegexUnion, RegexConcat)):
+        return f"({str(expr)})"
+    return str(expr)
