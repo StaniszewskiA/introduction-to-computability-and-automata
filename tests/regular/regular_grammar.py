@@ -61,20 +61,6 @@ class RegularGrammar:
         
         Supports both right-linear and left-linear regular grammars.
     """
-    
-
-
-
-def make_regular_grammar(
-    variables: set[str] = None,
-    terminals: set[str] = None,
-    productions: list[RegularProduction] = None,
-    start_variable: str = None,
-    grammar_type: GrammarType = GrammarType.RIGHT_LINEAR
-):
-    """
-        Regular grammar factory.
-    """
     def __init__(
         self,
         variables: set[str],
