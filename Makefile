@@ -3,18 +3,6 @@ VENV_ACTIVATE = venv\Scripts\Activate.ps1
 PIP = pip
 PYTEST = python -m pytest
 
-.DEFAULT_GOAL := help
-
-help:
-	@echo "Available targets:"
-	@echo "  setup         - Create virtual environment and install dependencies"
-	@echo "  install       - Install dependencies"
-	@echo "  test          - Run all tests"
-	@echo "  test-regular  - Run regular expression tests"
-	@echo "  test-fsa      - Run FSA tests"
-	@echo "  coverage      - Run tests with coverage report"
-	@echo "  clean         - Clean up generated files"
-
 setup:
 	$(PYTHON) -m venv venv
 	powershell -Command "& { . $(VENV_ACTIVATE); $(PIP) install pytest pytest-cov }"
@@ -25,7 +13,10 @@ install:
 test:
 	powershell -Command "& { . $(VENV_ACTIVATE); $(PYTEST) tests/regular/regular_expression.py tests/regular/fsa.py -v }"
 
-test-regular:
+test-regular-grammar:
+	powershell -Command "& { . $(VENV_ACTIVATE); $(PYTEST) tests/regular/regular_grammar.py -v }"
+
+test-regex:
 	powershell -Command "& { . $(VENV_ACTIVATE); $(PYTEST) tests/regular/regular_expression.py -v }"
 
 test-fsa:
