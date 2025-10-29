@@ -10,10 +10,9 @@ class MooreMachine(FSA):
         alphabet=None,
         transitions=None,
         start_state=None,
-        final_states=None,
         output=None
     ):
-        super().__init__(alphabet, transitions, start_state, final_states)
+        super().__init__(alphabet, transitions, start_state)
         if output is None:
             self.output = {state: "" for state in self.get_states()}
         else:
@@ -52,12 +51,8 @@ class MooreMachine(FSA):
 
     def accepts(self, string: str) -> bool:
         """
-            Check whether the Moore machine accepts given string.
+            Placeholder: Moore machines are not acceptors
         """
-        state = self.start
-
-        for symbol in string:
-            state = self.step(state, symbol)
-
-        return state in self.final_states
+        raise NotImplementedError("Moore ")
+        
         
