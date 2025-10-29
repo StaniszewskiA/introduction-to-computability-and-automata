@@ -1,6 +1,7 @@
+from src.regular.automata.moore_machine import MooreMachine
 from src.regular.fsa_base import FSA
-from src.regular.automatons.dfa import DFA
-from src.regular.automatons.nfa import NFA
+from src.regular.automata.dfa import DFA
+from src.regular.automata.nfa import NFA
 
 
 # Factories
@@ -23,3 +24,16 @@ def make_nfa(alphabet = None, transitions = None, start_state = None, final_stat
         NFA factory.
     """
     return NFA(alphabet, transitions, start_state, final_states)
+
+
+def make_moore_machine(
+    alphabet = None, 
+    transitions = None, 
+    start_state = None, 
+    final_states = None, 
+    output = None
+) -> MooreMachine:
+    """
+        Moore Machine factory.
+    """
+    return MooreMachine(alphabet, transitions, start_state, final_states, output)

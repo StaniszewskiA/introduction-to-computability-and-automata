@@ -1,6 +1,6 @@
 import pytest
 
-from src.regular.fsa import make_dfa, make_nfa
+from src.regular.fsa import make_dfa, make_moore_machine, make_nfa
 from src.regular.regular_expression import EmptyString, RegexUnion, RegularExpression, Symbol
 
 @pytest.fixture
@@ -55,6 +55,24 @@ def multi_final_nfa():
         },
         start_state = 'q0',
         final_states = {'q1', 'q2'}
+    )
+
+@pytest.fixture
+def simple_moore_machine():
+    return make_moore_machine(
+        alphabet = {'0', '1'},
+        transitions = {
+            'S': {'0': 'A', '1': 'B'},
+            'A': {'0': 'S', '1': 'B'},
+            'B': {'0': 'B', '1': 'S'}
+        },
+        start_state = 'S',
+        final_states = {'B'},
+        output = {
+            'S': 'x',
+            'A': 'y',
+            'B': 'z',
+        }        
     )
 
 # =============================================================================
@@ -231,3 +249,32 @@ class TestNFASpecificFunctionalities:
         
         assert nfa.accepts('a') == False
         assert nfa.accepts('aa') == True
+
+# =============================================================================
+# MOORE MACHINE FUNCTIONALITIES
+# =============================================================================
+
+class TestMooreMachine:
+    """
+        Tests for Moore Machine functionalities.
+    """
+    def test_outputs_for_input(self, simple_moore_machine):
+        # S --0--> A --1--> B
+        # x --0--> y --1--> z
+        outputs = simple_moore_machine.process_input("01")
+        assert outputs == ['x', 'y', 'z']
+
+    def test_accepts_final_state(self, simple_moore_machine):
+        # S--0--> A --1--> B (final)
+        assert simple_moore_machine.accepts("01")
+
+    def test_rejects_final_state(self, simple_moore_machine):
+        # S--0--> A (non-final)
+        assert not simple_moore_machine.accepts("0")
+
+    def test_invalid_symbol(self, simple_moore_machine):
+        with pytest.raises(ValueError):
+            simple_moore_machine.process_input("2")
+
+    def test_output_for_unknown_state(self, simple_moore_machine):
+        assert simple_moore_machine.get_output("Q") == ""
