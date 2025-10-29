@@ -67,7 +67,6 @@ def simple_moore_machine():
             'B': {'0': 'B', '1': 'S'}
         },
         start_state = 'S',
-        final_states = {'B'},
         output = {
             'S': 'x',
             'A': 'y',
@@ -264,17 +263,14 @@ class TestMooreMachine:
         outputs = simple_moore_machine.process_input("01")
         assert outputs == ['x', 'y', 'z']
 
-    def test_accepts_final_state(self, simple_moore_machine):
-        # S--0--> A --1--> B (final)
-        assert simple_moore_machine.accepts("01")
-
-    def test_rejects_final_state(self, simple_moore_machine):
-        # S--0--> A (non-final)
-        assert not simple_moore_machine.accepts("0")
-
     def test_invalid_symbol(self, simple_moore_machine):
         with pytest.raises(ValueError):
             simple_moore_machine.process_input("2")
 
     def test_output_for_unknown_state(self, simple_moore_machine):
         assert simple_moore_machine.get_output("Q") == ""
+
+    def test_accepts_attempt_fails(self, simple_moore_machine):
+        # Moore machines are not acceptors
+        with pytest.raises(NotImplementedError):
+            assert simple_moore_machine.accepts("01")

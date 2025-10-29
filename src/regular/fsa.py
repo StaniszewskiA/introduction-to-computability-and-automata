@@ -30,10 +30,9 @@ def make_moore_machine(
     alphabet = None, 
     transitions = None, 
     start_state = None, 
-    final_states = None, 
     output = None
 ) -> MooreMachine:
     """
         Moore Machine factory.
     """
-    return MooreMachine(alphabet, transitions, start_state, final_states, output)
+    return MooreMachine(alphabet, transitions, start_state, output)
