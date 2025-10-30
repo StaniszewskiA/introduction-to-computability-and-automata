@@ -1,6 +1,6 @@
 import pytest
 
-from src.regular.fsa import make_dfa, make_moore_machine, make_nfa
+from src.regular.fsa import make_dfa, make_mealy_machine, make_moore_machine, make_nfa
 from src.regular.regular_expression import EmptyString, RegexUnion, RegularExpression, Symbol
 
 @pytest.fixture
@@ -72,6 +72,23 @@ def simple_moore_machine():
             'A': 'y',
             'B': 'z',
         }        
+    )
+
+@pytest.fixture
+def simple_mealy_machine():
+    return make_mealy_machine(
+        alphabet = {'0', '1'},
+        transitions = {
+            'S': {'0': 'A', '1': 'B'},
+            'A': {'0': 'S', '1': 'B'},
+            'B': {'0': 'B', '1': 'S'}
+        },
+        start_state = 'S',
+        output = {
+            'S': {'0': 'x', '1': 'y'},
+            'A': {'0': 'z', '1': 'w'},
+            'B': {'0': 'p', '1': 'q'}
+        }
     )
 
 # =============================================================================
@@ -274,3 +291,23 @@ class TestMooreMachine:
         # Moore machines are not acceptors
         with pytest.raises(NotImplementedError):
             assert simple_moore_machine.accepts("01")
+
+# =============================================================================
+# MEALY MACHINE FUNCTIONALITIES
+# =============================================================================
+
+class TestMealyMachine:
+    """
+        Tests for Mealy Machine functionalities.
+    """
+    def test_outputs_for_input(self, simple_mealy_machine):
+        # S--0/x--> A --1/w--> b
+        outputs = simple_mealy_machine.process_input("01")
+        assert outputs == ['x', 'w']
+
+    def test_invalid_symbol(self, simple_mealy_machine):
+        with pytest.raises(ValueError):
+            simple_mealy_machine.process_input("2")
+
+    def test_out_for_unknown_state(self, simple_mealy_machine):
+        assert simple_mealy_machine

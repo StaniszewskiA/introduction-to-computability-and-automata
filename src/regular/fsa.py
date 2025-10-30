@@ -1,3 +1,4 @@
+from src.regular.automata.mealy_machine import MealyMachine
 from src.regular.automata.moore_machine import MooreMachine
 from src.regular.fsa_base import FSA
 from src.regular.automata.dfa import DFA
@@ -36,3 +37,15 @@ def make_moore_machine(
         Moore Machine factory.
     """
     return MooreMachine(alphabet, transitions, start_state, output)
+
+
+def make_mealy_machine(
+    alphabet = None,
+    transitions = None,
+    start_state = None,
+    output = None
+) -> MealyMachine:
+    """
+        Mealy Machine factory.
+    """
+    return MealyMachine(alphabet, transitions, start_state, output)
